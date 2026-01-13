@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tier 2 Escalation Generator</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            padding: 10px;
+            background-color: #ffffff; 
+        }
+        .container { 
+            max-width: 100%; 
+            margin: auto; 
+        }
+        h3 { 
+            margin-top: 0; 
+            border-bottom: 2px solid #007bff; 
+            padding-bottom: 5px; 
+            color: #333; 
+            font-size: 1.2rem;
+        }
+        .form-group { margin-bottom: 10px; }
+        label { display: block; margin-bottom: 3px; font-weight: 600; font-size: 0.9rem; color: #555; }
+        input[type="text"] { 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+        }
+        
+        .output-section { margin-top: 20px; }
+        textarea {
+            width: 100%;
+            height: 150px;
+            font-family: "Courier New", Courier, monospace;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #f8f9fa;
+            white-space: pre;
+            font-size: 0.85rem;
+        }
+        #preview {
+            border: 1px solid #ddd;
+            padding: 15px;
+            background: #fff;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover { background-color: #0056b3; }
+        
+        /* Grid layout for inputs to save space */
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .full-width { grid-column: span 2; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>Tier 2 Escalation Generator</h3>
+    
+    <form id="templateForm" onsubmit="return false;">
+        <div class="input-grid">
+            <div class="form-group">
+                <label for="contactInput">Contact Name</label>
+                <input type="text" id="contactInput" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label for="caseInput">Case Number</label>
+                <input type="text" id="caseInput" placeholder="CS-12345">
+            </div>
+            <div class="form-group full-width">
+                <label for="linkInput">Booking Link</label>
+                <input type="text" id="linkInput" placeholder="https://calendly.com/...">
+            </div>
+        </div>
+    </form>
+
+    <div class="output-section">
+        <label>Live Preview:</label>
+        <div id="preview"></div>
+    </div>
+
+    <div class="output-section">
+        <label>ServiceNow HTML Code:</label>
+        <textarea id="sourceCode" readonly></textarea>
+        <button id="copyBtn">Copy Code</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const contactInput = document.getElementById('contactInput');
+    const caseInput = document.getElementById('caseInput');
+    const linkInput = document.getElementById('linkInput');
+    const previewDiv = document.getElementById('preview');
+    const sourceTextarea = document.getElementById('sourceCode');
+    const copyBtn = document.getElementById('copyBtn');
+
+    function updateTemplate() {
+        const contact = contactInput.value || "[Contact]";
+        const caseNumber = caseInput.value || "[CaseNumber]";
+        const bookingLink = linkInput.value || "BookingLink";
+
+        const htmlContent = `
+<p>Hello ${contact},</p>
+
+<p>Your case, ${caseNumber}, has been escalated to the Tier 2 Support Team.</p>
+<p>To move this forward, please review the support policies below. You may schedule a remote troubleshooting session with the next available technician using the link provided.</p>
+<hr>
+
+<h3><a href="${bookingLink}">CLICK HERE TO BOOK A TROUBLESHOOTING SESSION FOR ${caseNumber}</a></h3>
+	
+<p>All times are shown in US Central Time (CT). Please adjust for your time zone:
+<br>ET (+1h), MT (-1h), PT (-2h), AKT (-3h), HAT (-5h)</p>
+<hr>
+
+<h3><a href="https://my.vingcard.com">CLICK HERE FOR SERVICE NOW PORTAL ACCESS</a></h3>
+<ul>
+    <li>Sign in with your email. Use "Forgot Password" if needed.</li>
+    <li>To find your case, go to "All Cases". (${caseNumber})</li>
+</ul>
+<p>On your first login, you must also:<br>
+Accept the GDPR agreement > Complete your profile.</p>
+
+<hr>
+
+<h3>CUSTOMER SUPPORT CHARGES</h3>
+<ul>
+    <li><strong>Contract Customers:</strong> Remote support is included.</li>
+    <li><strong>Non-Contract:</strong>
+        <ul>
+            <li>Weekdays (7 AM-7 PM, non-holidays): $85/15 min.</li>
+            <li>Other times: $500/hour.</li>
+        </ul>
+    </li>
+</ul>
+<p><strong>Software Installation/Migrations/Integrations:</strong> For new/reimaged devices, this becomes a separate Professional Services case.</p>
+`;
+
+        previewDiv.innerHTML = htmlContent;
+        sourceTextarea.value = "[code]" + htmlContent.trim() + "[/code]";
+    }
+
+    // Live update listeners
+    contactInput.addEventListener('input', updateTemplate);
+    caseInput.addEventListener('input', updateTemplate);
+    linkInput.addEventListener('input', updateTemplate);
+
+    copyBtn.addEventListener('click', () => {
+        sourceTextarea.select();
+        sourceTextarea.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(sourceTextarea.value);
+        
+        const originalText = copyBtn.innerText;
+        copyBtn.innerText = "Copied!";
+        copyBtn.style.backgroundColor = "#28a745";
+        setTimeout(() => {
+            copyBtn.innerText = originalText;
+            copyBtn.style.backgroundColor = "#007bff";
+        }, 1500);
+    });
+
+    updateTemplate();
+});
+</script>
+
+</body>
+</html>
